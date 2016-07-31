@@ -25,10 +25,12 @@
         (send-msg channel (str "USER " user " TYPED " text))))))
 
 (defn -main [& args]
-  (let [apitoken (slurp ".apitoken")
-        req-url (str "https://slack.com/api/rtm.start?token=" apitoken)
-        slack-response (-> req-url slurp parse-string)
-        slack-url (get slack-response "url")
-        socket- (ws/connect slack-url :on-receive on-receive)]
-    (reset! socket socket-)
-    (println "RUNNING")))
+  (let [apitoken (System/getenv "SLACKBOTAPITOKEN")]
+    (if apitoken
+      (let [req-url (str "https://slack.com/api/rtm.start?token=" apitoken)
+            slack-response (-> req-url slurp parse-string)
+            slack-url (get slack-response "url")
+            socket- (ws/connect slack-url :on-receive on-receive)]
+        (reset! socket socket-)
+        (println "RUNNING"))
+      (println "environment variable SLACKBOTAPITOKEN not set, quitting"))))
